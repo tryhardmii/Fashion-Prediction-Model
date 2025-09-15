@@ -2,6 +2,9 @@ import tensorflow as tf
 import os
 import numpy as np
 
+if "training_1" not in os.listdir('.'):
+    os.mkdir("training_1")
+
 # setting fashion_mnist as the dataset to be using
 data = tf.keras.datasets.fashion_mnist
 
@@ -9,7 +12,7 @@ data = tf.keras.datasets.fashion_mnist
 training_images = training_images / 255.0
 test_images = test_images / 255.0               # dividing by 255 so that every greyscale value is between 0-1
 
-checkpoint_path = "training_1/test.weights.h5" #location that weights will be stored in
+checkpoint_path = "training_1/cp.ckpt.weights.h5" #location that weights will be stored in
 cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path, save_weights_only=True)
 #setting model checkpoint to the path specified
 # saving only the weights, no other data is needed.
@@ -25,19 +28,12 @@ def create_model(): #creating layers of a neural network
 
 
 model = create_model()
-model.load_weights(checkpoint_path)
-
-
-"""
-model.fit(training_images, training_labels, epochs=5, callbacks = [cp_callback]) #callback argument automatically saves the file
-model.evaluate(test_images, test_labels) #uncomment to train the model
-"""
-
-
-class_names = [
-            "T-shirt/top", "Trouser", "Pullover", "Dress", "Coat",
-            "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"
-        ]
+if len(os.listdir('training_1')) > 0:
+    model.load_weights(checkpoint_path)
+model.fit(training_images, training_labels, epochs=5,
+          callbacks=[cp_callback])  # callback argument automatically saves the file
+model.evaluate(test_images, test_labels)  # uncomment to train the model
+class_names = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
 
 
 
@@ -70,7 +66,7 @@ def predict_new_image(image_path, model):
         print(f"Error: The file at {image_path} was not found. Please check the path.")
     except Exception as e:
         print(f"An error occurred: {e}")
-# --- Example Usage ---
-# Replace 'path/to/your/image.jpg' with the actual path to your image file
-my_image_path = "IMG_4225.jpg"
-print(class_names[predict_new_image(my_image_path, model)])
+
+my_image_path = ["boots.jfif"]
+for image in my_image_path:
+    print(image + ": " + class_names[predict_new_image(image, model)])
